@@ -6,7 +6,7 @@ push: null
 
 pull:
   - prefect.deployments.steps.git_clone:
-      repository: https://github.com/WatcharananPha/dsi321_2025
+      repository: https://github.com/NewPemika/dsi321_2025.git
       branch: main
 
 deployments:

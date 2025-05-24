@@ -61,10 +61,24 @@ def load_data_from_lakefs(s3_path, storage_opts):
     return df.sort_values(by=TIMESTAMP_COLUMN, ascending=False)
 
 def create_sidebar():
-    auto_refresh = st.sidebar.checkbox('Enable Auto-refresh', value=True)
-    refresh_interval = st.sidebar.slider('Refresh Interval (s)', 5, 120, REFRESH_INTERVAL_DEFAULT)
-    contamination_factor = st.sidebar.slider('Anomaly Sensitivity (%)', 1, 25, ANOMALY_SENSITIVITY_DEFAULT) / 100
-    st.sidebar.caption(f"UTC: {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S')}")
+    st.sidebar.markdown("<h2 style='color:#ffffff;'>🔧 Settings</h2>", unsafe_allow_html=True)
+    st.sidebar.markdown("<p style='color:#ffffff;'>⏱️ Auto-refresh</p>", unsafe_allow_html=True)
+    auto_refresh = st.sidebar.toggle('', value=True)
+    st.sidebar.markdown("<p style='color:#ffffff;'>🕒 Refresh Interval (sec)</p>", unsafe_allow_html=True)
+    st.markdown("""
+        <style>
+            .stSlider > div[data-baseweb="slider"] > div {
+                color: white !important;
+            }
+        </style>
+    """, unsafe_allow_html=True)
+    refresh_interval = st.sidebar.slider('', 5, 120, REFRESH_INTERVAL_DEFAULT)
+    st.sidebar.markdown("<p style='color:#ffffff;'>🎯 Anomaly Sensitivity (%)</p>", unsafe_allow_html=True)
+    contamination_factor = st.sidebar.slider('', 1, 25, ANOMALY_SENSITIVITY_DEFAULT) / 100
+    st.sidebar.markdown(
+        f"<div style='color: #ffffff; font-size: 12px;'>🌍 UTC Time: {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S')}</div>",
+        unsafe_allow_html=True
+    )
     return auto_refresh, refresh_interval, contamination_factor
 
 def display_metrics(latest_data_row, anomaly_status):
@@ -75,31 +89,31 @@ def display_metrics(latest_data_row, anomaly_status):
     col1.metric("⚡ Power Output", f"{power:,.1f} MW" if pd.notna(power) else "N/A")
     col2.metric("🌡️ Temperature", f"{temp:.1f}°C" if pd.notna(temp) else "N/A")
     col3.metric("🕒 Source Time", str(disp_time))
-    col4.error("⚠️ Anomaly" if anomaly_status else "✅ Normal")
+    col4.metric("📉 Status", "⚠️ Anomaly" if anomaly_status else "✅ Normal")
 
 def display_charts(chart_data):
     chart_col1, chart_col2 = st.columns(2)
     with chart_col1:
-        st.subheader(f"⚡ {POWER_COLUMN}")
+        st.markdown("### ⚡ Power Output (MW)", unsafe_allow_html=True)
         st.line_chart(chart_data.set_index(TIMESTAMP_COLUMN)[POWER_COLUMN], height=300)
     with chart_col2:
-        st.subheader(f"🌡️ {TEMP_COLUMN}")
+        st.markdown("### 🌡️ Temperature (°C)", unsafe_allow_html=True)
         st.line_chart(chart_data.set_index(TIMESTAMP_COLUMN)[TEMP_COLUMN], height=300)
 
 def display_statistics(anomalies, chart_data):
-    st.subheader("📊 Chart Data Statistics")
+    st.markdown("### 📊 Data Summary", unsafe_allow_html=True)
     cols = st.columns(4)
     total_anomalies = anomalies.sum()
     anomaly_rate = (total_anomalies / len(anomalies)) * 100 if len(anomalies) > 0 else 0
     avg_power = chart_data[POWER_COLUMN].mean()
     peak_power = chart_data[POWER_COLUMN].max()
-    cols[0].metric("Anomalies", f"{int(total_anomalies)}")
-    cols[1].metric("Anomaly Rate", f"{anomaly_rate:.1f}%")
-    cols[2].metric("Avg Power", f"{avg_power:,.1f} MW")
-    cols[3].metric("Peak Power", f"{peak_power:,.1f} MW")
+    cols[0].metric("⚠️ Anomalies", f"{int(total_anomalies)}")
+    cols[1].metric("📈 Anomaly Rate", f"{anomaly_rate:.1f}%")
+    cols[2].metric("📊 Avg Power", f"{avg_power:,.1f} MW")
+    cols[3].metric("🚀 Peak Power", f"{peak_power:,.1f} MW")
 
 def display_recent_data_table(df_all_data, anomalies):
-    st.subheader("📝 Recent Data (Latest 10)")
+    st.markdown("### 📝 Latest 10 Records", unsafe_allow_html=True)
     df_display = df_all_data.head(10).copy()
     df_display['Status'] = ['⚠️ Anomaly' if anom else '✅ Normal' for anom in anomalies[:len(df_display)]]
     cols = [TIMESTAMP_COLUMN, DISPLAY_TIME_COLUMN, POWER_COLUMN, TEMP_COLUMN, 'Status']
@@ -107,7 +121,26 @@ def display_recent_data_table(df_all_data, anomalies):
     st.dataframe(df_display[existing_cols], hide_index=True)
 
 def run_app():
-    st.title("⚡ EGAT Realtime Power Generation Dashboard (via lakeFS)")
+    st.markdown("""
+        <style>
+            body {
+                background-color: #0f172a;
+                color: #f8fafc;
+            }
+            .st-emotion-cache-1v0mbdj {
+                padding: 2rem;
+                background-color: #0f172a;
+                color: #f8fafc;
+            }
+            .st-emotion-cache-6qob1r {
+                background-color: #1e293b !important;
+            }
+        </style>
+    """, unsafe_allow_html=True)
+
+    st.markdown("<h1 style='color:#10b981;'>⚡ EGAT Realtime Power Dashboard</h1>", unsafe_allow_html=True)
+    st.caption("🌙 Dark Mode • Powered by lakeFS")
+
     auto_refresh, refresh_interval, contamination = create_sidebar()
     last_refresh_ph = st.empty()
     metrics_ph = st.container()
@@ -128,7 +161,7 @@ def run_app():
         display_charts(chart_data)
         display_statistics(anomalies_chart, chart_data)
 
-    last_refresh_ph.caption(f"Dashboard refreshed: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+    last_refresh_ph.caption(f"🔄 Last updated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
 
     if auto_refresh:
         time.sleep(refresh_interval)

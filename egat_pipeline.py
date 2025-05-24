@@ -85,6 +85,7 @@ def process_and_store_data_task(new_data_dict: dict, lakefs_s3_path: str, storag
     if not new_data_dict:
         return False
     existing_df = pd.DataFrame()
+    
     try:
         existing_df = pd.read_parquet(lakefs_s3_path, storage_options=storage_options)
         existing_df['scrape_timestamp_utc'] = pd.to_datetime(existing_df['scrape_timestamp_utc'], errors='coerce').dt.tz_localize(None)
