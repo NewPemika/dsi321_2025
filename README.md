@@ -122,7 +122,7 @@ docker-compose up --build
 
 ---
 
-## 📷 Streamlit Dashboard Example
+## Streamlit Dashboard Example
 
 ![image](https://github.com/user-attachments/assets/4f0202d2-6481-4f03-8f96-f7149cf8fa8d)
 
