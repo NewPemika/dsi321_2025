@@ -105,6 +105,7 @@ docker-compose up --build
 
 ---
 ## ตัวอย่างภาพจาก Streamlit
-![image](https://github.com/user-attachments/assets/c8112ea4-71ab-4942-aa44-a55b53d7c84f)
+![image](https://github.com/user-attachments/assets/4f0202d2-6481-4f03-8f96-f7149cf8fa8d)
+
 
 ![image](https://github.com/user-attachments/assets/970bbb11-7b35-4e41-b96f-768c9b670a64)
