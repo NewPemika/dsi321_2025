@@ -1,59 +1,75 @@
-# ⚡ ระบบดึงข้อมูลการผลิตไฟฟ้าเรียลไทม์จาก กฟผ. (EGAT Real-time Power Data Pipeline)
 
-โปรเจกต์นี้มีวัตถุประสงค์เพื่อดึงข้อมูลการผลิตไฟฟ้าแบบเรียลไทม์จากเว็บไซต์ของการไฟฟ้าฝ่ายผลิตแห่งประเทศไทย (EGAT) และจัดเก็บข้อมูลเป็นไฟล์เวอร์ชันผ่านระบบ LakeFS โดยใช้ Prefect ในการควบคุม Workflow และทำงานแบบอัตโนมัติผ่าน Docker Compose
+# EGAT Real-time Power Data Pipeline
 
----
-
-## คุณสมบัติเด่น
-
--  **ดึงข้อมูลเรียลไทม์:** ใช้ Selenium เปิดหน้าเว็บไซต์และดึงข้อมูล MW และอุณหภูมิจาก Console log
-- **ควบคุมด้วย Prefect:** ใช้ Prefect ในการจัดการ Task และ Flow ของ pipeline
-- **ทำงานแบบ container:** รองรับการรันผ่าน Docker Compose เพื่อความสะดวกในการใช้งานและ deploy
-- **จัดเก็บข้อมูลใน LakeFS:** บันทึกข้อมูลเป็นไฟล์ Parquet ลงใน S3 bucket ที่ใช้ LakeFS เพื่อการควบคุมเวอร์ชันของข้อมูล
-- **รองรับการ Commit อัตโนมัติ:** มีการ commit ข้อมูลใหม่เข้า LakeFS อัตโนมัติในทุกครั้งที่มีข้อมูลใหม่
+This project aims to extract real-time electricity production data from the website of the Electricity Generating Authority of Thailand (EGAT), and store the versioned data using LakeFS. The workflow is orchestrated by Prefect and runs automatically via Docker Compose.
 
 ---
 
-##  โครงสร้างโปรเจกต์
+##  Key Features
+
+- **Real-time Data Extraction:** Uses Selenium to open the website and extract MW and temperature data from the browser console log.
+- **Workflow Orchestration with Prefect:** Prefect is used to manage tasks and flows in the pipeline.
+- **Containerized Operation:** Supports execution via Docker Compose for ease of deployment and reproducibility.
+- **Versioned Data Storage in LakeFS:** Stores the extracted data in Parquet format in an S3 bucket managed by LakeFS for version control.
+- **Automated Commits:** Automatically commits new data into LakeFS whenever new records are available.
+
+---
+
+## Project Structure
 
 ```
-egat-scraper/
-├── egat_pipeline.py # ไฟล์หลักของ Prefect flow และ task
-├── streamlit_app.py # Dashboard UI แสดงข้อมูลและ anomaly
-├── egat_realtime_power.csv # ตัวอย่างข้อมูล
-├── egat_realtime_power_history.parquet # ข้อมูลเวอร์ชันใน LakeFS
-├── docker-compose.yml # Container config
-├── prefect.yaml # Prefect deployment
-├── requirements.txt # รายการ dependencies
-└── README.md # รายงานโครงการ
-```
+
+DSI321\_2025-MAIN/
+├── README.md                         # Project documentation
+├── docker-compose.yml                # Runs the multi-container setup
+├── prefect.yaml                      # Prefect deployment configuration
+├── egat\_pipeline.py                  # Prefect pipeline for scraping and storing data
+├── egat\_realtime\_power.csv           # Raw data extracted from EGAT
+│
+├── **pycache**/                      # Auto-generated compiled Python files
+│   └── egat\_pipeline.cpython-312.pyc
+│
+├── jupyter\_app/                      # Jupyter-based testing of pipeline
+│   ├── Dockerfile                    # Docker config for notebook container
+│   ├── requirements.txt              # Python dependencies for the notebook
+│   ├── run\_scraper\_and\_save\_to\_lakefs.ipynb           # Main notebook
+│   └── .ipynb\_checkpoints/
+│       └── run\_scraper\_and\_save\_to\_lakefs-checkpoint.ipynb # Auto checkpoint
+│
+├── parquet/                          # Versioned Parquet data storage
+│   └── egat\_realtime\_power\_history.parquet
+│
+└── UI/                               # Additional UI components
+└── streamlit\_app.py
+
+````
 
 ---
 
-## ความต้องการเบื้องต้น
+## Prerequisites
 
-- Python 3.7 ขึ้นไป
-- ติดตั้ง Google Chrome
-- Docker และ Docker Compose
-- มี Prefect และ LakeFS ติดตั้งพร้อมใช้งาน
+- Python 3.7+
+- Google Chrome installed
+- Docker and Docker Compose
+- Prefect and LakeFS installed and configured
 
 ---
 
-##  การใช้งาน
+## How to Use
 
-### 1. ติดตั้งไลบรารีที่จำเป็น
+### 1. Install Dependencies
 
 ```bash
 pip install -r requirements.txt
-```
+````
 
-หรือหากไม่มี `requirements.txt` ให้ติดตั้งดังนี้:
+If `requirements.txt` is missing, install manually:
 
 ```bash
 pip install pandas selenium webdriver-manager prefect lakefs-client pyarrow
 ```
 
-### 2. กำหนด Environment Variables (ผ่าน `.env` หรือ export)
+### 2. Set Environment Variables (via `.env` or export)
 
 ```env
 LAKEFS_ACCESS_KEY_ID=your_access_key
@@ -61,7 +77,7 @@ LAKEFS_SECRET_ACCESS_KEY=your_secret_key
 LAKEFS_ENDPOINT_URL=http://localhost:8001/
 ```
 
-### 3. เรียกใช้งาน Prefect flow (ใน local)
+### 3. Run the Prefect Flow (Locally)
 
 ```bash
 python egat_pipeline.py
@@ -69,43 +85,49 @@ python egat_pipeline.py
 
 ---
 
-## การใช้งานร่วมกับ Docker Compose
+## Run with Docker Compose
 
 ```bash
 docker-compose up --build
 ```
 
-> ตรวจสอบให้แน่ใจว่า Prefect agent และ LakeFS container ทำงานก่อน
+> Ensure that both the Prefect agent and LakeFS container are running before starting the flow.
 
 ---
 
-## 📈 ข้อมูลที่บันทึก
+## Data Fields
 
-- `display_date_id`: วันที่แสดงในระบบ
-- `display_time`: เวลาที่แสดง
-- `current_value_MW`: กำลังการผลิต (เมกะวัตต์)
-- `temperature_C`: อุณหภูมิ
-- `scrape_timestamp_utc`: เวลาที่ดึงข้อมูลใน UTC
+* `display_date_id`: Date shown on source system
+* `display_time`: Time displayed
+* `current_value_MW`: Power production in megawatts
+* `temperature_C`: Temperature in Celsius
+* `scrape_timestamp_utc`: UTC timestamp of data extraction
+
+---
+
+##  Project Report
+
+### 1. Data Visualization
+
+* Streamlit dashboard displays:
+
+  * Line charts for power and temperature
+  * Table of latest 10 records
+  * Key metrics (e.g., peak, average, anomaly rate)
+  * Anomaly status indicator
+
+### 2. Machine Learning Application
+
+* Uses `IsolationForest` to detect anomalies in power data
+* Anomaly sensitivity is adjustable via sidebar
+* Displays status: Normal or Anomaly
 
 ---
 
-### รายงานโครงการ
+## 📷 Streamlit Dashboard Example
 
-#### 1. การนำเสนอข้อมูลด้วยภาพ 
-- ใช้ Streamlit สร้าง Dashboard ที่แสดง:
-  - Line chart: Power และ Temperature
-  - ตาราง 10 รายการล่าสุด
-  - ตัวชี้วัด (metrics)
-  - อัตราความผิดปกติ (Anomaly rate)
-
-#### 2. การใช้ Machine Learning 
-- ใช้ `IsolationForest` เพื่อตรวจจับ anomaly จากค่าพลังงานไฟฟ้า
-- ปรับระดับความไวได้ผ่าน Sidebar
-- แสดงสถานะ: ✅ Normal หรือ ⚠️ Anomaly
-
----
-## ตัวอย่างภาพจาก Streamlit
 ![image](https://github.com/user-attachments/assets/4f0202d2-6481-4f03-8f96-f7149cf8fa8d)
 
-
 ![image](https://github.com/user-attachments/assets/970bbb11-7b35-4e41-b96f-768c9b670a64)
+
+```
