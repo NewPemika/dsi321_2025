@@ -18,11 +18,14 @@
 
 ```
 egat-scraper/
-├── egat_pipeline.py             # ไฟล์หลักของ Prefect flow และ task
-├── egat_realtime_power.csv      # ตัวอย่างข้อมูลที่ดึงได้
-├── docker-compose.yml           # ไฟล์สำหรับรัน container ต่างๆ
-├── prefect.yaml                 # การตั้งค่า deployment ของ Prefect
-└── README.md                    # คู่มือการใช้งาน
+├── egat_pipeline.py # ไฟล์หลักของ Prefect flow และ task
+├── streamlit_app.py # Dashboard UI แสดงข้อมูลและ anomaly
+├── egat_realtime_power.csv # ตัวอย่างข้อมูล
+├── egat_realtime_power_history.parquet # ข้อมูลเวอร์ชันใน LakeFS
+├── docker-compose.yml # Container config
+├── prefect.yaml # Prefect deployment
+├── requirements.txt # รายการ dependencies
+└── README.md # รายงานโครงการ
 ```
 
 ---
@@ -86,3 +89,19 @@ docker-compose up --build
 
 ---
 
+### รายงานโครงการ
+
+#### 1. การนำเสนอข้อมูลด้วยภาพ 
+- ใช้ Streamlit สร้าง Dashboard ที่แสดง:
+  - Line chart: Power และ Temperature
+  - ตาราง 10 รายการล่าสุด
+  - ตัวชี้วัด (metrics)
+  - อัตราความผิดปกติ (Anomaly rate)
+
+#### 2. การใช้ Machine Learning 
+- ใช้ `IsolationForest` เพื่อตรวจจับ anomaly จากค่าพลังงานไฟฟ้า
+- ปรับระดับความไวได้ผ่าน Sidebar
+- แสดงสถานะ: ✅ Normal หรือ ⚠️ Anomaly
+
+---
+## ตัวอย่างภาพจาก Streamlit
