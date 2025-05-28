@@ -23,8 +23,7 @@ DSI321\_2025-MAIN/
 ├── README.md                         # Project documentation
 ├── docker-compose.yml                # Runs the multi-container setup
 ├── prefect.yaml                      # Prefect deployment configuration
-├── egat\_pipeline.py                  # Prefect pipeline for scraping and storing data
-├── egat\_realtime\_power.csv           # Raw data extracted from EGAT
+├── egat\_pipeline.py                  # Prefect pipeline for scraping and storing dat
 │
 ├── **pycache**/                      # Auto-generated compiled Python files
 │   └── egat\_pipeline.cpython-312.pyc
@@ -98,7 +97,6 @@ docker-compose up --build
 ## Data Fields
 
 * `display_date_id`: Date shown on source system
-* `display_time`: Time displayed
 * `current_value_MW`: Power production in megawatts
 * `temperature_C`: Temperature in Celsius
 * `scrape_timestamp_utc`: UTC timestamp of data extraction
