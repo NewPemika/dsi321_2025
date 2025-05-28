@@ -1,7 +1,7 @@
 
 # EGAT Real-time Power Data Pipeline
 
-This project aims to extract real-time electricity production data from the website of the Electricity Generating Authority of Thailand (EGAT), and store the versioned data using LakeFS. The workflow is orchestrated by Prefect and runs automatically via Docker Compose.
+This project is designed to extract real-time electricity generation data from the Electricity Generating Authority of Thailand (EGAT) website (https://www.sothailand.com/sysgen/egat/). It leverages Selenium to interact with the website and capture data from the browser’s Console Log, where dynamic updates are logged. The collected data is continuously saved to a CSV file at defined intervals. To ensure data versioning and integrity, the dataset is stored in LakeFS. The entire workflow is orchestrated using Prefect and executed automatically through Docker Compose.
 
 ---
 
